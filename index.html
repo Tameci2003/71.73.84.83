@@ -182,6 +182,72 @@
   .btn:hover,.btn:focus-visible{background:rgba(0,229,208,.2);color:#fff;outline:none}
   .feed-foot .stamp{margin-top:0;margin-left:auto}
   @media(max-width:620px){.feed-foot .stamp{margin-left:0;width:100%}}
+
+  /* ---- audio channel modal + dock ---- */
+  .modal{
+    position:fixed; inset:0; z-index:40; display:none;
+    align-items:center; justify-content:center; padding:18px;
+    background:rgba(2,6,8,.82); backdrop-filter:blur(3px);
+  }
+  .modal.show{display:flex; animation:fade .35s ease-out}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .mbox{
+    position:relative; width:min(470px,100%);
+    background:#04090c; border:1px solid rgba(0,229,208,.45);
+    padding:clamp(20px,4vw,30px);
+    clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);
+    animation:pop .35s cubic-bezier(.2,.9,.3,1.1);
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+  .mhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .mhead b{font-size:clamp(13px,2.6vw,17px);letter-spacing:.24em;color:var(--amb);font-weight:400}
+  .inc{display:flex;align-items:center;gap:7px;color:var(--red);
+    font-size:clamp(9px,1.8vw,11px);letter-spacing:.22em}
+  .inc i{width:8px;height:8px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 9px rgba(255,59,82,.8);animation:blink 1.2s steps(1) infinite}
+  .mbox hr{border:0;border-top:1px solid rgba(0,229,208,.28);margin:16px 0}
+  .mrow{display:flex;gap:14px;padding:6px 0;font-size:clamp(11px,2.2vw,13px);letter-spacing:.1em}
+  .mrow span{color:var(--cy-dim);min-width:74px;letter-spacing:.2em}
+  .mrow b{color:var(--ink);font-weight:400}
+  .mnote{margin-top:14px;font-size:clamp(9px,1.8vw,11px);line-height:1.7;
+    color:var(--cy-dim);opacity:.8;letter-spacing:.08em}
+  .mbtns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .mbtns .btn{flex:1;min-width:130px;text-align:center;padding:11px 14px}
+  .btn.primary{background:rgba(0,229,208,.16);border-color:rgba(0,229,208,.8);color:#fff}
+  .btn.primary:hover,.btn.primary:focus-visible{background:rgba(0,229,208,.3)}
+
+  .dock{
+    position:fixed; right:16px; bottom:16px; z-index:35;
+    width:min(360px,calc(100vw - 32px));
+    background:#04090c; border:1px solid rgba(0,229,208,.45);
+    animation:pop .3s ease-out;
+  }
+  .dock[hidden]{display:none}
+  .dhead{display:flex;justify-content:space-between;align-items:center;
+    padding:7px 10px;border-bottom:1px solid rgba(0,229,208,.25);
+    font-size:10px;letter-spacing:.2em;color:var(--cy)}
+  .dhead button{background:none;border:0;color:var(--cy-dim);cursor:pointer;
+    font:inherit;font-size:13px;padding:2px 5px}
+  .dhead button:hover,.dhead button:focus-visible{color:#fff;outline:none}
+  #spotify-embed{min-height:80px}
+  #spotify-embed iframe{display:block;border:0;width:100%}
+  @media(max-width:520px){.dock{right:8px;left:8px;bottom:8px;width:auto}}
+
+  /* ---- operator channels ---- */
+  .links{margin-top:30px;padding-top:22px;border-top:1px solid rgba(0,229,208,.2)}
+  .links .k{color:var(--amb);letter-spacing:.3em;display:block;margin-bottom:15px}
+  .lrow{display:flex;gap:11px;flex-wrap:wrap}
+  .lrow a{
+    display:inline-block; color:var(--cy); text-decoration:none;
+    border:1px solid rgba(0,229,208,.4); background:rgba(0,229,208,.05);
+    padding:10px 16px; font-size:clamp(10px,2vw,13px); letter-spacing:.16em;
+    transition:.2s;
+  }
+  .lrow a:hover,.lrow a:focus-visible{
+    background:rgba(0,229,208,.2); color:#fff; border-color:#fff; outline:none;
+    text-shadow:0 0 14px rgba(0,229,208,.85);
+  }
+  @media(max-width:520px){.lrow{flex-direction:column}.lrow a{text-align:center}}
 </style>
 </head>
 <body>
@@ -207,17 +273,19 @@
       <span class="rec" id="rec"><i></i>REC</span>
     </div>
     <div class="screen">
-      <video id="vid" src="GITS_1.mp4" muted loop playsinline autoplay preload="metadata"
-             aria-label="Visual log feed 01">
-        <p class="nofeed">FEED UNAVAILABLE — <a href="GITS_1.mp4">open raw stream</a></p>
+      <video id="vid" muted loop playsinline autoplay preload="metadata"
+             poster="poster.jpg" aria-label="Visual log feed 01">
+        <source src="GITS_1_web.mp4" type="video/mp4">
+        <source src="GITS_1_web.webm" type="video/webm">
+        <p class="nofeed">FEED UNAVAILABLE — <a href="GITS_1_web.mp4">open raw stream</a></p>
       </video>
       <div class="scan"></div>
-      <div class="hud"><span id="tc">--:-- / --:--</span><span>CH.09 // 1920×1080</span></div>
+      <div class="hud"><span id="tc">--:-- / --:--</span><span id="res">CH.09</span></div>
     </div>
     <div class="feed-foot">
       <button type="button" class="btn" id="pp" aria-pressed="true">■ PAUSE</button>
       <button type="button" class="btn" id="snd" aria-pressed="false">▸ AUDIO OFF</button>
-      <span class="stamp">SOURCE // GITS_1.MP4</span>
+      <span class="stamp">SOURCE // GITS_1_WEB.MP4</span>
     </div>
   </section>
 
@@ -232,6 +300,14 @@
   </div>
 
   <div class="whisper"><span id="type"></span><span class="cursor"></span></div>
+
+  <div class="links">
+    <span class="k">▶ OPERATOR CHANNELS</span>
+    <div class="lrow">
+      <a href="https://x.com/Poramato3" target="_blank" rel="noopener">X ↗ @Poramato3</a>
+      <a href="https://www.instagram.com/poramato3/" target="_blank" rel="noopener">INSTAGRAM ↗ @poramato3</a>
+    </div>
+  </div>
 
   <div class="ticks" id="ticks"></div>
 
@@ -332,8 +408,10 @@
     var m = Math.floor(sec/60), s = Math.floor(sec%60);
     return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
   }
+  var res = document.getElementById('res');
   function paint(){
     tc.textContent = clock(vid.currentTime) + ' / ' + clock(vid.duration);
+    if(vid.videoWidth) res.textContent = 'CH.09 // ' + vid.videoWidth + '\u00d7' + vid.videoHeight;
   }
   function setPlayLabel(){
     var playing = !vid.paused;
@@ -346,10 +424,33 @@
   vid.addEventListener('loadedmetadata', paint);
   vid.addEventListener('play', setPlayLabel);
   vid.addEventListener('pause', setPlayLabel);
-  vid.addEventListener('error', function(){
+  function dead(){
     tc.textContent = 'SIGNAL LOST';
     vid.parentNode.className = 'screen dead';
     rec.className = 'rec off';
+  }
+  // เผื่อไฟล์ถูกอัปด้วยชื่ออื่น (เบราว์เซอร์ชอบเติม " (1)" ตอนดาวน์โหลด)
+  var ALT = ['GITS_1_web (1).mp4','GITS_1_web (1).webm','GITS_1 (1).mp4',
+             'GITS_1.mp4','GITS_1.webm','video.mp4'];
+  var ai = -1;
+  function nextAlt(){
+    ai++;
+    if(ai >= ALT.length){ dead(); return; }
+    vid.src = encodeURI(ALT[ai]);
+    vid.load();
+    var pr = vid.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  }
+
+  vid.addEventListener('error', nextAlt);
+  // <source> ที่โหลดไม่ได้จะยิง error ที่ตัวมันเอง ไม่ใช่ที่ <video>
+  // ต้องเช็คเองว่าไล่ครบทุก source แล้วยังไม่มีอันไหนใช้ได้
+  Array.prototype.forEach.call(vid.getElementsByTagName('source'), function(sc){
+    sc.addEventListener('error', function(){
+      setTimeout(function(){
+        if(vid.readyState === 0 && vid.networkState === 3 && ai < 0) nextAlt();
+      }, 0);
+    });
   });
 
   pp.addEventListener('click', function(){
@@ -370,6 +471,78 @@
     if(pr && pr.catch) pr.catch(function(){ setPlayLabel(); });
   }
   setPlayLabel();
+})();
+</script>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+  <div class="mbox">
+    <div class="mhead">
+      <b id="mtitle">◢ AUDIO CHANNEL 09</b>
+      <span class="inc"><i></i>INCOMING</span>
+    </div>
+    <hr>
+    <div class="mrow"><span>SOURCE</span><b>GO GHOST</b></div>
+    <div class="mrow"><span>ARTIST</span><b>KING GNU</b></div>
+    <div class="mrow"><span>USE</span><b>OPENING THEME — 攻殻機動隊 2026</b></div>
+    <div class="mnote">
+      Establishing the link opens an official Spotify player.
+      Free accounts hear a 30-second preview; log in to Spotify for the full track.
+    </div>
+    <div class="mbtns">
+      <button type="button" class="btn primary" id="ok">▶ ESTABLISH LINK</button>
+      <button type="button" class="btn" id="no">✕ DECLINE</button>
+    </div>
+  </div>
+</div>
+
+<div class="dock" id="dock" hidden>
+  <div class="dhead"><span>◢ AUDIO CHANNEL 09 // GO GHOST</span>
+    <button type="button" id="dclose" aria-label="Close audio channel">✕</button></div>
+  <div id="spotify-embed"></div>
+</div>
+
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<script>
+(function(){
+  var ALBUM = 'spotify:album:6r4iLpQblsOsMClZ0KqKTN';
+  var modal=document.getElementById('modal'), dock=document.getElementById('dock'),
+      ok=document.getElementById('ok'), no=document.getElementById('no'),
+      dclose=document.getElementById('dclose'), ctrl=null, wanted=false;
+
+  window.onSpotifyIframeApiReady = function(API){
+    API.createController(document.getElementById('spotify-embed'),
+      {uri:ALBUM, width:'100%', height:'152'},
+      function(c){ ctrl=c; if(wanted) try{ c.play(); }catch(e){} });
+  };
+
+  function close(){ modal.classList.remove('show'); }
+  setTimeout(function(){ modal.classList.add('show'); ok.focus(); }, 1200);
+
+  // ถ้าสคริปต์ Spotify โหลดไม่ได้ (แอดบล็อก/เน็ตล่ม) ให้ขึ้นลิงก์ตรงแทนกล่องว่าง
+  function fallback(){
+    var host=document.getElementById('spotify-embed');
+    if(host.querySelector('iframe')) return;
+    host.innerHTML='<div style="padding:15px;font-size:11px;line-height:1.8;'
+      +'letter-spacing:.1em;color:#0b8f84">PLAYER BLOCKED<br>'
+      +'<a href="https://open.spotify.com/album/6r4iLpQblsOsMClZ0KqKTN" target="_blank" '
+      +'rel="noopener" style="color:#00e5d0">↗ open GO GHOST on Spotify</a></div>';
+  }
+
+  ok.addEventListener('click', function(){
+    close(); dock.hidden=false; wanted=true;
+    // ต้องกดก่อน เบราว์เซอร์ถึงยอมให้เล่นเสียง
+    if(ctrl) try{ ctrl.play(); }catch(e){}
+    setTimeout(fallback, 4000);
+  });
+  no.addEventListener('click', close);
+  modal.addEventListener('click', function(e){ if(e.target===modal) close(); });
+  dclose.addEventListener('click', function(){
+    if(ctrl) try{ ctrl.pause(); }catch(e){}
+    dock.hidden=true;
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ if(modal.classList.contains('show')) close(); else if(!dock.hidden) dclose.click(); }
+  });
 })();
 </script>
 </body>
